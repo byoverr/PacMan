@@ -1,7 +1,7 @@
 import pygame
 from player import Player
 from enemies import *
-
+from PIL import Image
 SCREEN_WIDTH = 475
 SCREEN_HEIGHT = 625
 
@@ -10,11 +10,12 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
+FORMAT = "RGBA"
 
 
 class Game(object):
     def __init__(self):
-        self.font = pygame.font.Font(None, 40)
+        self.font2 = pygame.font.Font(None, 25)
         self.about = False
         self.game_over = True
         # переменная для очков
@@ -128,7 +129,8 @@ class Game(object):
         # рисование
         if self.game_over:
             if self.about:
-                self.display_message(screen, "Oops")
+                self.display_message(screen, ["Controlling Pac-Man, eat all the dots in the maze",
+                                              "avoiding the ghosts that are chasing the hero."])
             else:
                 self.menu.display_frame(screen)
         else:
@@ -149,12 +151,17 @@ class Game(object):
         pygame.display.flip()
 
     def display_message(self, screen, message, color=(255, 0, 0)):
-        label = self.font.render(message, True, color)
-        width = label.get_width()
-        height = label.get_height()
-        posX = (SCREEN_WIDTH / 2) - (width / 2)
-        posY = (SCREEN_HEIGHT / 2) - (height / 2)
-        screen.blit(label, (posX, posY))
+        for index, item in enumerate(message):
+            label = self.font2.render(item, True, color)
+
+            width = label.get_width()
+            height = label.get_height()
+
+            posX = (SCREEN_WIDTH / 2) - (width / 2)
+            t_h = len(message) * height
+            posY = (SCREEN_HEIGHT / 2) - (t_h / 2) + (index * height)
+
+            screen.blit(label, (posX, posY))
 
 
 class Menu(object):
@@ -165,6 +172,8 @@ class Menu(object):
         self.select_color = select_color
         self.items = items
         self.font = pygame.font.Font(ttf_font, font_size)
+        self.logo = pygame.image.load('logo.png')
+        self.image = pygame.image.load('pac.jpg')
 
     def display_frame(self, screen):
         for index, item in enumerate(self.items):
@@ -180,6 +189,8 @@ class Menu(object):
             t_h = len(self.items) * height
             posY = (SCREEN_HEIGHT / 2) - (t_h / 2) + (index * height)
 
+            screen.blit(self.logo, (35, 80))
+            screen.blit(self.image, (30, 420))
             screen.blit(label, (posX, posY))
 
     def event_handler(self, event):
