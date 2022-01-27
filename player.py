@@ -22,14 +22,14 @@ class Player(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        img = pygame.image.load("walk.png").convert()
+        img = pygame.image.load("data/walk.png").convert()
         # создание анимации
         self.move_right_animation = Animation(img, 25, 25)
         self.move_left_animation = Animation(pygame.transform.flip(img, True, False), 25, 25)
         self.move_up_animation = Animation(pygame.transform.rotate(img, 90), 25, 25)
         self.move_down_animation = Animation(pygame.transform.rotate(img, 270), 25, 25)
         # загрузка взрыва пакмана
-        img = pygame.image.load("explosion.png").convert()
+        img = pygame.image.load("data/explosion.png").convert()
         self.explosion_animation = Animation(img, 25, 25)
         self.player_image = pygame.image.load(filename).convert()
         self.player_image.set_colorkey(BLACK)

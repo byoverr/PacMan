@@ -25,7 +25,7 @@ class Game(object):
         # меню игры
         self.menu = Menu(("Start", "About", "Exit"), font_color=WHITE, font_size=60)
         # сам пакман
-        self.player = Player(9 * 25, 18 * 25, "player.png")
+        self.player = Player(9 * 25, 18 * 25, "data/player.png")
         # блоки где пакман будет ходить
         self.horizontal_blocks = pygame.sprite.Group()
         self.vertical_blocks = pygame.sprite.Group()
@@ -56,8 +56,8 @@ class Game(object):
                     self.dots_group.add(Ellipse(j * 25 + 8, i * 25 + 8, WHITE, 8, 8))
 
         # Load the sound effects
-        self.pacman_sound = pygame.mixer.Sound("pacman_sound.ogg")
-        self.game_over_sound = pygame.mixer.Sound("game_over_sound.ogg")
+        self.pacman_sound = pygame.mixer.Sound("data/pacman_sound.ogg")
+        self.game_over_sound = pygame.mixer.Sound("data/game_over_sound.ogg")
 
     def process_events(self):
         for event in pygame.event.get():  # если ты что-то нажал
@@ -172,8 +172,8 @@ class Menu(object):
         self.select_color = select_color
         self.items = items
         self.font = pygame.font.Font(ttf_font, font_size)
-        self.logo = pygame.image.load('logo.png')
-        self.image = pygame.image.load('pac.jpg')
+        self.logo = pygame.image.load('data/logo.png')
+        self.image = pygame.image.load('data/pac.jpg')
 
     def display_frame(self, screen):
         for index, item in enumerate(self.items):
