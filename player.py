@@ -37,48 +37,83 @@ class Player(pygame.sprite.Sprite):
 
         map = enviroment()
 
-        # передвижение PacMan
+        # идеальное передвижение PacMan
         try:
             if map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable and self.future_up:
-                if not self.future_down and not self.future_up:
-                    self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
-
-                self.change_y = -2
-                self.future_down = False
-                self.future_up = False
-                self.future_right = False
-                self.future_left = False
+                if not self.future_down:
+                    if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
+                        self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
+                        self.change_y = -2
+                        self.change_x = 0
+                        self.future_down = False
+                        self.future_up = False
+                        self.future_right = False
+                        self.future_left = False
+                        self.future_right = False
+                else:
+                    self.change_y = 2
+                    self.future_down = False
+                    self.future_up = False
+                    self.future_right = False
+                    self.future_left = False
+                    self.future_right = False
 
             elif map[round(self.rect.y / 25) + 1][round(self.rect.x / 25)] in variable and self.future_down:
-                if not self.future_up and not self.future_down:
-                    self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
-
-                self.change_y = 2
-                self.future_down = False
-                self.future_up = False
-                self.future_right = False
-                self.future_left = False
+                if not self.future_up:
+                    if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
+                        self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
+                        self.change_y = 2
+                        self.change_x = 0
+                        self.future_down = False
+                        self.future_up = False
+                        self.future_right = False
+                        self.future_left = False
+                        self.future_right = False
+                else:
+                    self.change_y = 2
+                    self.future_down = False
+                    self.future_up = False
+                    self.future_right = False
+                    self.future_left = False
+                    self.future_right = False
 
             if map[round(self.rect.y / 25)][round(self.rect.x / 25) - 1] in variable and self.future_left:
-                if not self.future_right and not self.future_left:
-                    self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
-
-                self.change_x = -2
-                self.future_down = False
-                self.future_up = False
-                self.future_right = False
-                self.future_left = False
+                if not self.future_right:
+                    if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
+                        self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
+                        self.change_y = 0
+                        self.change_x = -2
+                        self.future_down = False
+                        self.future_up = False
+                        self.future_right = False
+                        self.future_left = False
+                        self.future_right = False
+                else:
+                    self.change_x = -2
+                    self.future_down = False
+                    self.future_up = False
+                    self.future_right = False
+                    self.future_left = False
+                    self.future_right = False
 
             elif map[round(self.rect.y / 25)][round(self.rect.x / 25) + 1] in variable and self.future_right:
-                if not self.future_left and not self.future_right:
-                    self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
-
-                self.change_x = 2
-                self.future_down = False
-                self.future_up = False
-                self.future_right = False
-                self.future_left = False
-                self.future_right = False
+                if not self.future_left:
+                    if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
+                        self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
+                        self.change_y = 0
+                        self.change_x = 2
+                        self.future_down = False
+                        self.future_up = False
+                        self.future_right = False
+                        self.future_left = False
+                        self.future_right = False
+                else:
+                    self.change_x = 2
+                    self.future_down = False
+                    self.future_up = False
+                    self.future_right = False
+                    self.future_left = False
+                    self.future_right = False
         except IndexError:
             pass
 
