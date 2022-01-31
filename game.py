@@ -2,15 +2,7 @@ import pygame
 from player import Player
 from enemies import *
 from PIL import Image
-SCREEN_WIDTH = 475
-SCREEN_HEIGHT = 625
-
-# Define some colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-RED = (255, 0, 0)
-FORMAT = "RGBA"
+from characteristic import *
 
 
 class Game(object):
@@ -53,7 +45,9 @@ class Game(object):
         for i, row in enumerate(enviroment()):
             for j, item in enumerate(row):
                 if item == 1 or item == 16 or item == 19:
-                    self.dots_group.add(Ellipse(j * 25 + 8, i * 25 + 8, WHITE, 8, 8))
+                    self.dots_group.add(Ellipse(j * 25 + 9.5, i * 25 + 9.5, WHITE, 6, 6))
+                elif item == 21:
+                    self.dots_group.add(Ellipse(j * 25 + 6.5, i * 25 + 6.5, WHITE, 12, 12))
 
         # Load the sound effects
         self.pacman_sound = pygame.mixer.Sound("data/pacman_sound.ogg")
@@ -93,16 +87,6 @@ class Game(object):
                 elif event.key == pygame.K_ESCAPE:
                     self.game_over = True
                     self.about = False
-
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT:
-                    self.player.stop_move_right()
-                elif event.key == pygame.K_LEFT:
-                    self.player.stop_move_left()
-                elif event.key == pygame.K_UP:
-                    self.player.stop_move_up()
-                elif event.key == pygame.K_DOWN:
-                    self.player.stop_move_down()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.player.explosion = True
