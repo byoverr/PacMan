@@ -1,12 +1,7 @@
 import pygame
 from enemies import enviroment
-
-SCREEN_WIDTH = 475
-SCREEN_HEIGHT = 625
-
-# Define some colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+from characteristic import *
+from math import fabs
 
 
 class Player(pygame.sprite.Sprite):
@@ -16,7 +11,10 @@ class Player(pygame.sprite.Sprite):
     game_over = False
 
     def __init__(self, x, y, filename):
-
+        self.future_left = False
+        self.future_down = False
+        self.future_right = False
+        self.future_up = False
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(filename).convert()
         self.image.set_colorkey(BLACK)
@@ -35,31 +33,79 @@ class Player(pygame.sprite.Sprite):
         self.player_image.set_colorkey(BLACK)
 
     def update(self, horizontal_blocks, vertical_blocks):
-        variable = [1, 16, 19, 20]
+        variable = [1, 16, 19, 20, 21]
 
         map = enviroment()
+
+        # передвижение PacMan
+        try:
+            if map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable and self.future_up:
+                if not self.future_down and not self.future_up:
+                    self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
+
+                self.change_y = -2
+                self.future_down = False
+                self.future_up = False
+                self.future_right = False
+                self.future_left = False
+
+            elif map[round(self.rect.y / 25) + 1][round(self.rect.x / 25)] in variable and self.future_down:
+                if not self.future_up and not self.future_down:
+                    self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
+
+                self.change_y = 2
+                self.future_down = False
+                self.future_up = False
+                self.future_right = False
+                self.future_left = False
+
+            if map[round(self.rect.y / 25)][round(self.rect.x / 25) - 1] in variable and self.future_left:
+                if not self.future_right and not self.future_left:
+                    self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
+
+                self.change_x = -2
+                self.future_down = False
+                self.future_up = False
+                self.future_right = False
+                self.future_left = False
+
+            elif map[round(self.rect.y / 25)][round(self.rect.x / 25) + 1] in variable and self.future_right:
+                if not self.future_left and not self.future_right:
+                    self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
+
+                self.change_x = 2
+                self.future_down = False
+                self.future_up = False
+                self.future_right = False
+                self.future_left = False
+                self.future_right = False
+        except IndexError:
+            pass
+
+        # остановка пакмена перед стеной
         try:
             if not map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable and self.change_y < 0:
-                if round(self.rect.y / 25) * 25 - self.rect.y > 2:
+                if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
                     self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
                     self.change_y = 0
 
             elif not map[round(self.rect.y / 25) + 1][round(self.rect.x / 25)] in variable and self.change_y > 0:
-                if round(self.rect.y / 25) * 25 - self.rect.y < 2:
+                if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
                     self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
                     self.change_y = 0
 
             if not map[round(self.rect.y / 25)][round(self.rect.x / 25) - 1] in variable and self.change_x < 0:
-                if round(self.rect.x / 25) * 25 - self.rect.x > 2:
+                if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
                     self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
                     self.change_x = 0
 
             elif not map[round(self.rect.y / 25)][round(self.rect.x / 25) + 1] in variable and self.change_x > 0:
-                if round(self.rect.x / 25) * 25 - self.rect.x < 2:
+                if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
                     self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
                     self.change_x = 0
         except IndexError:
             pass
+
         if not self.explosion:
             if self.rect.right < 0:
                 self.rect.left = SCREEN_WIDTH
@@ -76,10 +122,8 @@ class Player(pygame.sprite.Sprite):
 
             for block in pygame.sprite.spritecollide(self, horizontal_blocks, False):
                 self.rect.centery = block.rect.centery
-                self.change_y = 0
             for block in pygame.sprite.spritecollide(self, vertical_blocks, False):
                 self.rect.centerx = block.rect.centerx
-                self.change_x = 0
 
             # анимация
 
@@ -104,36 +148,16 @@ class Player(pygame.sprite.Sprite):
             self.image = self.explosion_animation.get_current_image()
 
     def move_right(self):
-        self.change_x = 2
+        self.future_right = True
 
     def move_left(self):
-        self.change_x = -2
+        self.future_left = True
 
     def move_up(self):
-        self.change_y = -2
+        self.future_up = True
 
     def move_down(self):
-        self.change_y = 2
-
-    def stop_move_right(self):
-        if self.change_x != 0:
-            self.image = self.player_image
-        # self.change_x = 0
-
-    def stop_move_left(self):
-        if self.change_x != 0:
-            self.image = pygame.transform.flip(self.player_image, True, False)
-        # self.change_x = 0
-
-    def stop_move_up(self):
-        if self.change_y != 0:
-            self.image = pygame.transform.rotate(self.player_image, 90)
-        # self.change_y = 0
-
-    def stop_move_down(self):
-        if self.change_y != 0:
-            self.image = pygame.transform.rotate(self.player_image, 270)
-        # self.change_y = 0
+        self.future_down = True
 
 
 class Animation(object):
