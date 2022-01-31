@@ -1,7 +1,6 @@
 import pygame
 from player import Player
 from enemies import *
-from PIL import Image
 from characteristic import *
 
 
@@ -33,14 +32,8 @@ class Game(object):
 
         # создание привидения
         self.enemies = pygame.sprite.Group()
-        # self.enemies.add(Slime(288,96,0,2))
-        # self.enemies.add(Slime(288,320,0,-2))
-        # self.enemies.add(Slime(544,128,0,2))
-        # self.enemies.add(Slime(32,224,0,2))
-        # self.enemies.add(Slime(160,64,2,0))
-        # self.enemies.add(Slime(448,64,-2,0))
-        # self.enemies.add(Slime(640,448,2,0))
-        # self.enemies.add(Slime(448,320,2,0))
+        self.enemies.add(Blinky(9 * 25, 10 * 25, 2, 0))
+
         # добавление точек
         for i, row in enumerate(enviroment()):
             for j, item in enumerate(row):
@@ -106,7 +99,7 @@ class Game(object):
                 self.player.explosion = True
                 self.game_over_sound.play()
             self.game_over = self.player.game_over
-            self.enemies.update(self.horizontal_blocks, self.vertical_blocks)
+            self.enemies.update(self.horizontal_blocks, self.vertical_blocks, self.player.rect.x, self.player.rect.y)
 
     def display_frame(self, screen):
         screen.fill(BLACK)
