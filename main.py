@@ -12,6 +12,7 @@ def main():
     done = False
     clock = pygame.time.Clock()
     game = Game()
+
     while not done:
         # --- клики, нажатие клавиш
         done = game.process_events()
@@ -24,4 +25,5 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()

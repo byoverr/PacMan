@@ -1,6 +1,112 @@
 import pygame
-import random
 from characteristic import *
+from math import fabs, sqrt
+
+
+class Blinky(pygame.sprite.Sprite):
+    def __init__(self, x, y, change_x, change_y):
+        pygame.sprite.Sprite.__init__(self)
+        self.change_x = change_x
+        self.change_y = change_y
+        self.image = pygame.image.load("data/slime.png").convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+    def update(self, horizontal_blocks, vertical_blocks, player_x, player_y):
+
+        self.rect.x += self.change_x
+        self.rect.y += self.change_y
+        if self.rect.right < 0:
+            self.rect.left = SCREEN_WIDTH
+        elif self.rect.left > SCREEN_WIDTH:
+            self.rect.right = 0
+        if self.rect.bottom < 0:
+            self.rect.top = SCREEN_HEIGHT
+        elif self.rect.top > SCREEN_HEIGHT:
+            self.rect.bottom = 0
+
+        variable = [1, 16, 19, 20, 21]
+
+        map = enviroment()
+
+        if self.rect.topleft in self.get_intersection_position():
+            way_up, way_down, way_right, way_left = 0, 0, 0, 0
+            if map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable:
+                way_up = sqrt(((self.rect.x - player_x) ** 2) + ((self.rect.y - 25 - player_y) ** 2))
+            if map[round(self.rect.y / 25) + 1][round(self.rect.x / 25)] in variable:
+                way_down = sqrt(((self.rect.x - player_x) ** 2) + ((self.rect.y + 25 - player_y) ** 2))
+            if map[round(self.rect.y / 25)][round(self.rect.x / 25) + 1] in variable:
+                way_right = sqrt(((self.rect.x + 25 - player_x) ** 2) + ((self.rect.y - player_y) ** 2))
+            if map[round(self.rect.y / 25)][round(self.rect.x / 25) - 1] in variable:
+                way_left = sqrt(((self.rect.x - 25 - player_x) ** 2) + ((self.rect.y - player_y) ** 2))
+
+            ways = [way_up, way_down, way_right, way_left]
+
+            for i in range(len(ways) - 1):
+                for j in range(len(ways) - i - 1):
+                    if ways[j] > ways[j + 1]:
+                        ways[j], ways[j + 1] = ways[j + 1], ways[j]
+
+            for i in ways:
+                if i != 0:
+                    if i == way_up:
+                        self.change_x = 0
+                        self.change_y = -2
+                    elif i == way_right:
+                        self.change_x = 2
+                        self.change_y = 0
+                    elif i == way_left:
+                        self.change_x = -2
+                        self.change_y = 0
+                    elif i == way_down:
+                        self.change_x = 0
+                        self.change_y = 2
+                    break
+
+            # if direction == "left" and self.change_x == 0:
+            #     self.change_x = -2
+            #     self.change_y = 0
+            # elif direction == "right" and self.change_x == 0:
+            #     self.change_x = 2
+            #     self.change_y = 0
+            # elif direction == "up" and self.change_y == 0:
+            #     self.change_x = 0
+            #     self.change_y = -2
+            # elif direction == "down" and self.change_y == 0:
+            #     self.change_x = 0
+            #     self.change_y = 2
+
+        try:
+            if not map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable and self.change_y < 0:
+                if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
+                    self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
+                    self.change_y = 0
+
+            elif not map[round(self.rect.y / 25) + 1][round(self.rect.x / 25)] in variable and self.change_y > 0:
+                if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
+                    self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
+                    self.change_y = 0
+
+            if not map[round(self.rect.y / 25)][round(self.rect.x / 25) - 1] in variable and self.change_x < 0:
+                if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
+                    self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
+                    self.change_x = 0
+
+            elif not map[round(self.rect.y / 25)][round(self.rect.x / 25) + 1] in variable and self.change_x > 0:
+                if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
+                    self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
+                    self.change_x = 0
+        except IndexError:
+            pass
+
+    def get_intersection_position(self):
+        items = []
+        for i, row in enumerate(enviroment()):
+            for j, item in enumerate(row):
+                if item == 19:
+                    items.append((j * 25, i * 25))
+
+        return items
 
 
 class Block(pygame.sprite.Sprite):
@@ -23,56 +129,9 @@ class Ellipse(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
 
 
-class Slime(pygame.sprite.Sprite):
-    def __init__(self, x, y, change_x, change_y):
-        pygame.sprite.Sprite.__init__(self)
-        self.change_x = change_x
-        self.change_y = change_y
-        self.image = pygame.image.load("data/slime.png").convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-
-    def update(self, horizontal_blocks, vertical_blocks):
-        self.rect.x += self.change_x
-        self.rect.y += self.change_y
-        if self.rect.right < 0:
-            self.rect.left = SCREEN_WIDTH
-        elif self.rect.left > SCREEN_WIDTH:
-            self.rect.right = 0
-        if self.rect.bottom < 0:
-            self.rect.top = SCREEN_HEIGHT
-        elif self.rect.top > SCREEN_HEIGHT:
-            self.rect.bottom = 0
-
-        if self.rect.topleft in self.get_intersection_position():
-            direction = random.choice(("left", "right", "up", "down"))
-            if direction == "left" and self.change_x == 0:
-                self.change_x = -2
-                self.change_y = 0
-            elif direction == "right" and self.change_x == 0:
-                self.change_x = 2
-                self.change_y = 0
-            elif direction == "up" and self.change_y == 0:
-                self.change_x = 0
-                self.change_y = -2
-            elif direction == "down" and self.change_y == 0:
-                self.change_x = 0
-                self.change_y = 2
-
-    def get_intersection_position(self):
-        items = []
-        for i, row in enumerate(enviroment()):
-            for j, item in enumerate(row):
-                if item == 19:
-                    items.append((j * 25, i * 25))
-
-        return items
-
-
 def enviroment():
-    a = open('data/map.txt', mode='r')
-    b = tuple([tuple(map(int, i.strip().split())) for i in a.readlines()])
-    # grid = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    field = tuple([tuple(map(int, i.strip().split())) for i in open('data/map.txt', mode='r').readlines()])
+    # field = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     #  (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     #  (2, 10, 10, 10, 10, 10, 10, 10, 10, 12, 10, 10, 10, 10, 10, 10, 10, 10, 3),
     #  (11, 19, 1, 1, 19, 1, 1, 1, 19, 11, 19, 1, 1, 1, 19, 1, 1, 19, 11),
@@ -97,7 +156,7 @@ def enviroment():
     #  (11, 19, 1, 1, 1, 1, 1, 1, 19, 1, 19, 1, 1, 1, 1, 1, 1, 19, 11),
     #  (4, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 5))
 
-    return b
+    return field
 
 
 def draw_enviroment(screen):
