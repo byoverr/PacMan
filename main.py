@@ -1,13 +1,12 @@
 import pygame
 from game import Game
+from characteristic import *
 
-SCREEN_WIDTH = 475
-SCREEN_HEIGHT = 625
 
 def main():
     pygame.init()
     # ширина, высота окна
-    screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # заголовок окна
     pygame.display.set_caption("PACMAN")
     done = False
@@ -20,8 +19,9 @@ def main():
         game.run_logic()
         game.display_frame(screen)
         clock.tick(30)
-        #tkMessageBox.showinfo("GAME OVER!","Final Score = "+(str)(GAME.score))
+        # tkMessageBox.showinfo("GAME OVER!","Final Score = "+(str)(GAME.score))
     pygame.quit()
+
 
 if __name__ == '__main__':
     main()
