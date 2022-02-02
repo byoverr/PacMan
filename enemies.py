@@ -5,6 +5,7 @@ from math import fabs, sqrt
 
 class Blinky(pygame.sprite.Sprite):
     def __init__(self, x, y, change_x, change_y):
+        self.past_way = ''
         pygame.sprite.Sprite.__init__(self)
         self.change_x = change_x
         self.change_y = change_y
@@ -28,17 +29,15 @@ class Blinky(pygame.sprite.Sprite):
         variable = [1, 16, 19, 20, 21]
 
         map = enviroment()
-
         if self.rect.topleft in self.get_intersection_position():
-            way_up, way_down, way_right, way_left = 0, 0, 0, 0
-            if map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable:
-                way_up = sqrt(((self.rect.x - player_x) ** 2) + ((self.rect.y - 25 - player_y) ** 2))
-            if map[round(self.rect.y / 25) + 1][round(self.rect.x / 25)] in variable:
-                way_down = sqrt(((self.rect.x - player_x) ** 2) + ((self.rect.y + 25 - player_y) ** 2))
-            if map[round(self.rect.y / 25)][round(self.rect.x / 25) + 1] in variable:
-                way_right = sqrt(((self.rect.x + 25 - player_x) ** 2) + ((self.rect.y - player_y) ** 2))
-            if map[round(self.rect.y / 25)][round(self.rect.x / 25) - 1] in variable:
-                way_left = sqrt(((self.rect.x - 25 - player_x) ** 2) + ((self.rect.y - player_y) ** 2))
+            way_up, way_down, way_right, way_left = sqrt(
+                ((self.rect.x - player_x) ** 2) + ((self.rect.y - 25 - player_y) ** 2)), \
+                                                    sqrt(((self.rect.x - player_x) ** 2) + (
+                                                            (self.rect.y + 25 - player_y) ** 2)), \
+                                                    sqrt(((self.rect.x + 25 - player_x) ** 2) + (
+                                                            (self.rect.y - player_y) ** 2)), \
+                                                    sqrt(((self.rect.x - 25 - player_x) ** 2) + (
+                                                            (self.rect.y - player_y) ** 2))
 
             ways = [way_up, way_down, way_right, way_left]
 
@@ -48,19 +47,29 @@ class Blinky(pygame.sprite.Sprite):
                         ways[j], ways[j + 1] = ways[j + 1], ways[j]
 
             for i in ways:
-                if i != 0:
-                    if i == way_up:
-                        self.change_x = 0
-                        self.change_y = -2
-                    elif i == way_right:
-                        self.change_x = 2
-                        self.change_y = 0
-                    elif i == way_left:
-                        self.change_x = -2
-                        self.change_y = 0
-                    elif i == way_down:
-                        self.change_x = 0
-                        self.change_y = 2
+                if i == way_up and self.past_way != 'way_down' and map[round(self.rect.y / 25) - 1][
+                    round(self.rect.x / 25)] in variable:
+                    self.change_x = 0
+                    self.change_y = -2
+                    self.past_way = 'way_up'
+                    break
+                elif i == way_right and self.past_way != 'way_left' and map[round(self.rect.y / 25)][
+                    round(self.rect.x / 25) + 1] in variable:
+                    self.change_x = 2
+                    self.change_y = 0
+                    self.past_way = 'way_right'
+                    break
+                elif i == way_left and self.past_way != 'way_right' and map[round(self.rect.y / 25)][
+                    round(self.rect.x / 25) - 1] in variable:
+                    self.change_x = -2
+                    self.change_y = 0
+                    self.past_way = 'way_left'
+                    break
+                elif i == way_down and self.past_way != 'way_up' and map[round(self.rect.y / 25) + 1][
+                    round(self.rect.x / 25)] in variable:
+                    self.change_x = 0
+                    self.change_y = 2
+                    self.past_way = 'way_down'
                     break
 
             # if direction == "left" and self.change_x == 0:
