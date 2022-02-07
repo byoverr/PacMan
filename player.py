@@ -8,7 +8,7 @@ class Player(pygame.sprite.Sprite):
     change_x = 0
     change_y = 0
     explosion = False
-    game_over = False
+    round_over = False
 
     def __init__(self, x, y, filename):
         self.future_left = False
@@ -178,7 +178,7 @@ class Player(pygame.sprite.Sprite):
         else:
             if self.explosion_animation.index == self.explosion_animation.get_length() - 1:
                 pygame.time.wait(500)
-                self.game_over = True
+                self.round_over = True
             self.explosion_animation.update(12)
             self.image = self.explosion_animation.get_current_image()
 
