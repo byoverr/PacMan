@@ -179,6 +179,7 @@ class Player(pygame.sprite.Sprite):
             if self.explosion_animation.index == self.explosion_animation.get_length() - 1:
                 pygame.time.wait(500)
                 self.round_over = True
+                #self.image
             self.explosion_animation.update(12)
             self.image = self.explosion_animation.get_current_image()
 

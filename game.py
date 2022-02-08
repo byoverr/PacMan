@@ -14,7 +14,7 @@ class Game(object):
         self.round_win = False
         # переменная для очков
         self.level = 1
-        self.lives = 2
+        self.lives = 3
         if self.level == 1:
             self.score = 0
             self.all_dots = 0
@@ -132,6 +132,10 @@ class Game(object):
                         self.__init__()
         elif self.round_over:
             self.lives -= 1
+            self.player.explosion = False
+            self.player.rect.topleft = (9 * 25, 18 * 25)
+            screen.blit(self.player.image, self.player.rect)
+            self.player.round_over = False
             # еще код должен быть
         elif self.game_over:
             con = sqlite3.connect('data/records.db')
@@ -146,7 +150,7 @@ class Game(object):
             else:
                 self.menu.display_frame(screen)
         else:
-            for i in range(self.lives):
+            for i in range(self.lives - 1):
                 screen.blit(pygame.image.load('data/player.png'), (30 + (30 * i), 20))
 
             self.horizontal_blocks.draw(screen)
