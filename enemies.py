@@ -161,6 +161,14 @@ class Ellipse(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
 
 
+class Berry(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('data/berry.png')
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+
 def enviroment():
     field = tuple([tuple(map(int, i.strip().split())) for i in open('data/map.txt', mode='r').readlines()])
     # field = ((0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),

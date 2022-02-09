@@ -48,7 +48,7 @@ class Game(object):
                     self.dots_group.add(Ellipse(j * 25 + 9.5, i * 25 + 9.5, WHITE, 6, 6))
                 elif item == 21:
                     self.all_dots += 10
-                    self.dots_group.add(Ellipse(j * 25 + 6.5, i * 25 + 6.5, WHITE, 12, 12))
+                    self.dots_group.add(Berry(j * 25, i * 25))
 
         # Load the sound effects
         self.pacman_sound = pygame.mixer.Sound("data/pacman_sound.ogg")
