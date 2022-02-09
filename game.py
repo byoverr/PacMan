@@ -7,7 +7,6 @@ from characteristic import *
 
 class Game(object):
     def __init__(self):
-        self.font2 = pygame.font.Font(None, 25)
         self.about = False
         self.game_over = True
         self.round_over = False
@@ -15,14 +14,11 @@ class Game(object):
         # переменная для очков
         self.level = 1
         self.lives = 3
-        if self.level == 1:
-            self.score = 0
-            self.all_dots = 0
-        else:
-            self.score = self.score_round_win
-            self.all_dots = self.score_round_win
+        self.score = 0
+        self.all_dots = 0
         # шрифт для показа очков
         self.font = pygame.font.Font(None, 35)
+        self.font2 = pygame.font.Font(None, 25)
         # меню игры
         self.menu = Menu(("Start", "About", "Exit"), font_color=WHITE, font_size=60)
         # сам пакман
@@ -65,7 +61,18 @@ class Game(object):
             self.menu.event_handler(event)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    if self.game_over and not self.about:
+                    if self.round_win:
+                        self.level += 1
+                        self.lives_round_win = self.lives
+                        self.score_round_win = self.score
+                        self.level_round_win = self.level
+                        self.__init__()
+                        self.score = self.score_round_win
+                        self.level = self.level_round_win
+                        self.lives = self.lives_round_win
+                        self.game_over = False
+                        self.round_win = False
+                    elif self.game_over and not self.about:
                         if self.menu.state == 0:
                             # ---- START ------
                             self.__init__()
@@ -99,7 +106,7 @@ class Game(object):
         return False
 
     def run_logic(self):
-        if not self.game_over:
+        if not self.game_over and not self.round_win:
             self.player.update(self.horizontal_blocks, self.vertical_blocks)
             block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_group, True)
             # когда block_hit_list содержит один спрайт это значит что игрок попал в точку
@@ -119,28 +126,21 @@ class Game(object):
         screen.fill(BLACK)
         # рисование
         if self.round_win:
-
-            self.score_round_win = self.score
-
             self.display_message(screen, ["You won the level!",
                                           "Press Enter to continue."])
-
-            self.level += 1
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        self.__init__()
         elif self.round_over:
             self.lives -= 1
+            if self.lives == 0:
+                self.game_over = True
             self.player.explosion = False
+            self.player.image = pygame.image.load('data/player.png').convert()
+            self.player.image.set_colorkey(BLACK)
             self.player.rect.topleft = (9 * 25, 18 * 25)
             screen.blit(self.player.image, self.player.rect)
             self.player.round_over = False
-            # еще код должен быть
         elif self.game_over:
             con = sqlite3.connect('data/records.db')
-            cur = con.cursor()
-            cur.execute(f'''INSERT INTO record(score, level)
+            con.cursor().execute(f'''INSERT INTO record(score, level)
                             VALUES ('{self.score}', '{self.level}')''')
             con.commit()
             con.close()
@@ -163,8 +163,10 @@ class Game(object):
             # screen.blit(text, (30, 650))
             # Render the text for the score
             text = self.font.render("Score: " + str(self.score), True, GREEN)
+            text2 = self.font.render("Level: " + str(self.level), True, GREEN)
             # Put the text on the screen
             screen.blit(text, [120, 20])
+            screen.blit(text2, [300, 20])
 
         # --- Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
@@ -192,8 +194,6 @@ class Menu(object):
         self.items = items
         self.font = pygame.font.Font(ttf_font, font_size)
         self.font2 = pygame.font.Font(None, 40)
-        self.logo = pygame.image.load('data/logo.png')
-        self.image = pygame.image.load('data/pac.jpg')
 
     def display_frame(self, screen):
         for index, item in enumerate(self.items):
@@ -209,8 +209,8 @@ class Menu(object):
             t_h = len(self.items) * height
             posY = (SCREEN_HEIGHT / 2) - (t_h / 2) + (index * height)
 
-            screen.blit(self.logo, (35, 80))
-            screen.blit(self.image, (30, 420))
+            screen.blit(pygame.image.load('data/logo.png'), (35, 80))
+            screen.blit(pygame.image.load('data/pac.jpg'), (30, 420))
 
             con = sqlite3.connect('data/records.db')
             cur = con.cursor()
