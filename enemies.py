@@ -9,9 +9,31 @@ class Blinky(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.change_x = change_x
         self.change_y = change_y
-        self.image = pygame.image.load("data/slime.png").convert_alpha()
+        sheet = pygame.image.load("data/red animation.png")
+        self.frames = []
+        rows = 1
+        columns = 4
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
+        self.image = self.frames[0]
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+
+    def update_frame(self):
+        if self.past_way == 'way_right':
+            self.image = self.frames[0]
+
+        if self.past_way == 'way_down':
+            self.image = self.frames[1]
+
+        if self.past_way == 'way_left':
+            self.image = self.frames[2]
+
+        if self.past_way == 'way_up':
+            self.image = self.frames[3]
 
     def update(self, horizontal_blocks, vertical_blocks, player_x, player_y):
 
@@ -84,6 +106,7 @@ class Blinky(pygame.sprite.Sprite):
             # elif direction == "down" and self.change_y == 0:
             #     self.change_x = 0
             #     self.change_y = 2
+        self.update_frame()
 
         try:
             if not map[round(self.rect.y / 25) - 1][round(self.rect.x / 25)] in variable and self.change_y < 0:
