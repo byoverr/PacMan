@@ -38,7 +38,8 @@ class Game(object):
 
         # создание привидения
         self.enemies = pygame.sprite.Group()
-        self.enemies.add(Blinky(9 * 25, 10 * 25, 2, 0))
+        self.enemies.add(Blinky(10 * 25, 10 * 25, 2, 0))
+        self.enemies.add(Pinky(8 * 25, 10 * 25, -2, 0))
 
         # добавление точек
         for i, row in enumerate(enviroment()):
@@ -47,7 +48,7 @@ class Game(object):
                     self.all_dots += 10
                     self.dots_group.add(Ellipse(j * 25 + 9.5, i * 25 + 9.5, WHITE, 6, 6))
                 elif item == 21:
-                    self.all_dots += 10
+                    self.all_dots += 200
                     self.dots_group.add(Berry(j * 25, i * 25))
 
         # Load the sound effects
@@ -112,7 +113,11 @@ class Game(object):
             # когда block_hit_list содержит один спрайт это значит что игрок попал в точку
             if len(block_hit_list) > 0:
                 self.pacman_sound.play()
-                self.score += 10
+                if str(block_hit_list) == '[<Berry Sprite(in 0 groups)>]':
+                    self.score += 200
+                else:
+                    self.score += 10
+
                 if self.score == self.all_dots:
                     self.round_win = True
             block_hit_list = pygame.sprite.spritecollide(self.player, self.enemies, True)
