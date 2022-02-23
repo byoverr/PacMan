@@ -9,6 +9,7 @@ class Player(pygame.sprite.Sprite):
     change_y = 0
     explosion = False
     round_over = False
+    speed = 5
 
     def __init__(self, x, y, filename):
         self.future_left = False
@@ -33,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.player_image.set_colorkey(BLACK)
 
     def update(self, horizontal_blocks, vertical_blocks):
-        variable = [1, 16, 19, 20, 21]
+        variable = [1, 16, 19, 20, 21, 18, 23]
 
         map = enviroment()
 
@@ -43,7 +44,7 @@ class Player(pygame.sprite.Sprite):
                 if not self.future_down:
                     if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
                         self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
-                        self.change_y = -2
+                        self.change_y = -self.speed
                         self.change_x = 0
                         self.future_down = False
                         self.future_up = False
@@ -51,7 +52,7 @@ class Player(pygame.sprite.Sprite):
                         self.future_left = False
                         self.future_right = False
                 else:
-                    self.change_y = 2
+                    self.change_y = self.speed
                     self.future_down = False
                     self.future_up = False
                     self.future_right = False
@@ -62,7 +63,7 @@ class Player(pygame.sprite.Sprite):
                 if not self.future_up:
                     if fabs(round(self.rect.x / 25) * 25 - self.rect.x) < 2:
                         self.rect.topleft = (round(self.rect.x / 25) * 25, self.rect.y)
-                        self.change_y = 2
+                        self.change_y = self.speed
                         self.change_x = 0
                         self.future_down = False
                         self.future_up = False
@@ -70,7 +71,7 @@ class Player(pygame.sprite.Sprite):
                         self.future_left = False
                         self.future_right = False
                 else:
-                    self.change_y = 2
+                    self.change_y = self.speed
                     self.future_down = False
                     self.future_up = False
                     self.future_right = False
@@ -82,14 +83,14 @@ class Player(pygame.sprite.Sprite):
                     if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
                         self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
                         self.change_y = 0
-                        self.change_x = -2
+                        self.change_x = -self.speed
                         self.future_down = False
                         self.future_up = False
                         self.future_right = False
                         self.future_left = False
                         self.future_right = False
                 else:
-                    self.change_x = -2
+                    self.change_x = -self.speed
                     self.future_down = False
                     self.future_up = False
                     self.future_right = False
@@ -101,14 +102,14 @@ class Player(pygame.sprite.Sprite):
                     if fabs(round(self.rect.y / 25) * 25 - self.rect.y) < 2:
                         self.rect.topleft = (self.rect.x, round(self.rect.y / 25) * 25)
                         self.change_y = 0
-                        self.change_x = 2
+                        self.change_x = self.speed
                         self.future_down = False
                         self.future_up = False
                         self.future_right = False
                         self.future_left = False
                         self.future_right = False
                 else:
-                    self.change_x = 2
+                    self.change_x = self.speed
                     self.future_down = False
                     self.future_up = False
                     self.future_right = False

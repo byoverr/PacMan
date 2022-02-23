@@ -5,6 +5,8 @@ from characteristic import *
 
 def main():
     pygame.init()
+    pygame.joystick.init()
+    joystick = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
     # ширина, высота окна
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # заголовок окна
