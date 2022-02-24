@@ -367,7 +367,7 @@ class Inky(pygame.sprite.Sprite):
         if scare_blue:
             self.speed = 2.5
         else:
-            self.speed = 4.83
+            self.speed = 4.7
         self.rect.x += self.change_x
         self.rect.y += self.change_y
         if self.rect.right < 0:
@@ -538,7 +538,7 @@ class Clyde(pygame.sprite.Sprite):
         if scare_orange:
             self.speed = 2.5
         else:
-            self.speed = 4.75
+            self.speed = 4.4
 
         self.rect.x += self.change_x
         self.rect.y += self.change_y

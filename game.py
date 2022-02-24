@@ -5,10 +5,15 @@ from player import Player
 from enemies import *
 from characteristic import *
 from threading import Thread
-
+pygame.init()
+pygame.joystick.init()
+joystick = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+# ширина, высота окна
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 class Game(object):
-    def __init__(self):
+    def __init__(self, chek_start=False):
+        self.chek_start = chek_start
         self.score_live = 0
         self.not_was_win = True
         self.orange_scare = False
@@ -78,7 +83,6 @@ class Game(object):
         self.not_was_win = False
         self.win_sound.play()
         time.sleep(6)
-        self.not_was_win = True
 
     def process_events(self):
 
@@ -139,8 +143,10 @@ class Game(object):
                     elif self.game_over and not self.about:
                         if self.menu.state == 0:
                             # ---- START ------
-                            self.__init__()
+                            self.__init__(chek_start=True)
                             self.game_over = False
+                            self.win_sound.stop()
+                            pygame.mixer.Sound("data/intro.mp3").play()
 
                         elif self.menu.state == 1:
                             # --- EXIT -------
@@ -168,9 +174,13 @@ class Game(object):
         return False
 
     def run_logic(self):
+        if self.chek_start:
+            self.chek_start = False
+            self.display_frame(screen)
+            time.sleep(pygame.mixer.Sound("data/intro.mp3").get_length())
         if self.score_live >= 10000:
             self.lives += 1
-            self.score_live = 0
+            self.score_live -= 10000
         if not self.game_over and not self.round_win:
             self.player.update(self.horizontal_blocks, self.vertical_blocks)
             block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_group, True)
@@ -186,6 +196,7 @@ class Game(object):
                     self.pacman_sound.stop()
             block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_for_eat, True)
             if len(block_hit_list) > 0:
+                pygame.mixer.Sound('data/Extra.mp3').play()
                 self.score_live += 50
                 self.score += 50
                 for i in [self.B, self.I, self.P]:
@@ -255,6 +266,7 @@ class Game(object):
             self.orange_scare = False
 
     def eat(self, timer):
+        pygame.mixer.Sound("data/extra.mp3").play()
         count = 0
         self.eat_ghost = True
         self.red_scare = True
@@ -279,6 +291,7 @@ class Game(object):
         self.pink_scare = False
         self.orange_scare = False
         self.blue_scare = False
+        pygame.mixer.Sound("data/non_extra.mp3").play()
 
     def display_frame(self, screen):
         screen.fill(BLACK)
@@ -301,6 +314,11 @@ class Game(object):
             for i in self.enemies:
                 i.kill()
             self.player.explosion = False
+            self.eat_ghost = False
+            self.red_scare = False
+            self.blue_scare = False
+            self.orange_scare = False
+            self.pink_scare = False
             self.player.image = pygame.image.load('data/player.png').convert()
             self.player.image.set_colorkey(BLACK)
             self.player.rect.topleft = (9 * 25, 18 * 25)
