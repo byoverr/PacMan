@@ -1,17 +1,17 @@
 import time
-
 import pygame
 import sqlite3
 from player import Player
 from enemies import *
 from characteristic import *
-from moviepy.editor import *
 from threading import Thread
 
 
 class Game(object):
     def __init__(self):
-        self.change = False
+        self.score_live = 0
+        self.not_was_win = True
+        self.orange_scare = False
         self.red_scare = False
         self.pink_scare = False
         self.blue_scare = False
@@ -28,10 +28,10 @@ class Game(object):
         self.score = 0
         self.all_dots = 0
         # шрифт для показа очков
-        self.font = pygame.font.Font(None, 35)
-        self.font2 = pygame.font.Font(None, 25)
+        self.font = pygame.font.Font('data/fgr2.ttf', 25)
+        self.font2 = pygame.font.Font('data/fgr2.ttf', 25)
         # меню игры
-        self.menu = Menu(("Start", "Exit"), font_color=WHITE, font_size=60)
+        self.menu = Menu(("Start", "Exit"), font_color=WHITE, font_size=45, ttf_font='data/fgr2.ttf')
         # сам пакман
         self.player = Player(9 * 25, 18 * 25, "data/player.png")
         # блоки где пакман будет ходить
@@ -54,7 +54,8 @@ class Game(object):
         self.B = Blinky(9 * 25, 10 * 25, 0, 0)
         self.P = Pinky(9 * 25, 12 * 25, 0, 0)
         self.I = Inky(10 * 25, 12 * 25, 0, 0)
-        self.enemies.add(self.B, self.P, self.I)
+        self.C = Clyde(8 * 25, 12 * 25, 0, 0)
+        self.enemies.add(self.B, self.P, self.I, self.C)
 
         # добавление точек
         for i, row in enumerate(enviroment()):
@@ -63,15 +64,24 @@ class Game(object):
                     self.all_dots += 1
                     self.dots_group.add(Ellipse(j * 25 + 9.5, i * 25 + 9.5, WHITE, 6, 6))
                 elif item == 21 or item == 23:
+                    # Berry
                     self.all_dots += 1
-                    self.dots_for_eat.add(Berry(j * 25, i * 25))
+                    self.dots_for_eat.add(Ellipse(j * 25 + 6.5, i * 25 + 6.5, WHITE, 12, 12))
 
         # Load the sound effects
         self.pacman_sound = pygame.mixer.Sound("data/pacman_sound.ogg")
         self.game_over_sound = pygame.mixer.Sound("data/game_over_sound.ogg")
+        self.win_sound = pygame.mixer.Sound("data/win.mp3")
+        self.eat_ghost_sound = pygame.mixer.Sound("data/an-nam.mp3")
 
+    def win(self):
+        self.not_was_win = False
+        self.win_sound.play()
+        time.sleep(6)
+        self.not_was_win = True
 
     def process_events(self):
+
         for event in pygame.event.get():  # если ты что-то нажал
             if event.type == pygame.JOYAXISMOTION:
                 if event.axis == 0:
@@ -98,6 +108,9 @@ class Game(object):
                     elif self.cheat_joy == '013':
                         change_state = Thread(target=self.eat, args=[100])
                         change_state.start()
+                    elif self.cheat_joy == '35':
+                        self.score_live += 1000
+                        self.score += 1000
                     self.cheat_joy = ''
                 else:
                     self.cheat_joy += str(event.button)
@@ -118,6 +131,11 @@ class Game(object):
                         self.lives = self.lives_round_win
                         self.game_over = False
                         self.round_win = False
+                        con = sqlite3.connect('data/records.db')
+                        con.cursor().execute(f'''INSERT INTO record(score, level)
+                                        VALUES ('{self.score}', '{self.level}')''')
+                        con.commit()
+                        con.close()
                     elif self.game_over and not self.about:
                         if self.menu.state == 0:
                             # ---- START ------
@@ -147,15 +165,12 @@ class Game(object):
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.player.explosion = True
-
         return False
 
     def run_logic(self):
-
-        if self.score >= 100 and not self.change:
-            self.change = True
-            self.I.change_x = -1
-
+        if self.score_live >= 10000:
+            self.lives += 1
+            self.score_live = 0
         if not self.game_over and not self.round_win:
             self.player.update(self.horizontal_blocks, self.vertical_blocks)
             block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_group, True)
@@ -163,11 +178,19 @@ class Game(object):
             if len(block_hit_list) > 0:
                 self.pacman_sound.play()
                 self.score += 10
+                self.score_live += 10
                 self.all_dots -= 1
                 if len(self.dots_group) == 0 and len(self.dots_for_eat) == 0:
                     self.round_win = True
+
+                    self.pacman_sound.stop()
             block_hit_list = pygame.sprite.spritecollide(self.player, self.dots_for_eat, True)
             if len(block_hit_list) > 0:
+                self.score_live += 50
+                self.score += 50
+                for i in [self.B, self.I, self.P]:
+                    i.change_x = -i.change_x
+                    i.change_y = -i.change_y
                 change_state = Thread(target=self.eat, args=[5])
                 change_state.start()
 
@@ -178,9 +201,12 @@ class Game(object):
 
             if len(block_hit_list) > 0:
                 if not self.eat_ghost:
+
                     self.player.explosion = True
                     self.game_over_sound.play()
                 else:
+                    self.eat_ghost_sound.stop()
+                    self.eat_ghost_sound.play(maxtime=2000)
                     ghosts_now = []
                     for i in self.enemies:
                         ghosts_now.append(str(type(i)).split('.')[-1][:-2])
@@ -196,6 +222,9 @@ class Game(object):
                             elif i == 'Inky' and self.blue_scare:
                                 answer3 = Thread(target=self.death_ghost, args=[i])
                                 answer3.start()
+                            elif i == 'Clyde' and self.orange_scare:
+                                answer4 = Thread(target=self.death_ghost, args=[i])
+                                answer4.start()
                             else:
                                 self.player.explosion = True
                                 self.game_over_sound.play()
@@ -204,7 +233,8 @@ class Game(object):
             self.enemies.update(self.horizontal_blocks, self.vertical_blocks, self.player.rect.x, self.player.rect.y,
                                 change_x=self.player.change_x, change_y=self.player.change_y, red_x=self.B.rect.x,
                                 red_y=self.B.rect.y, scare_red=self.red_scare, scare_pink=self.pink_scare,
-                                scare_blue=self.blue_scare)
+                                scare_blue=self.blue_scare, scare_orange=self.orange_scare)
+
     def death_ghost(self, ghost):
         time.sleep(2)
         if ghost == 'Blinky':
@@ -219,31 +249,55 @@ class Game(object):
             self.I = Inky(10 * 25, 12 * 25, -1, 0)
             self.enemies.add(self.I)
             self.blue_scare = False
+        elif ghost == 'Clyde':
+            self.C = Clyde(8 * 25, 12 * 25, 1, 0)
+            self.enemies.add(self.C)
+            self.orange_scare = False
 
     def eat(self, timer):
         count = 0
         self.eat_ghost = True
         self.red_scare = True
+        self.orange_scare = True
         self.pink_scare = True
+        answer = pygame.mixer.Sound("data/scare_ghost_sound.mp3")
+        answer.set_volume(0.1)
+        answer.play()
         self.blue_scare = True
         time.sleep(timer)
-        for i in [self.red_scare, self.blue_scare, self.pink_scare]:
+        for i in [self.red_scare, self.blue_scare, self.pink_scare, self.orange_scare]:
             if i:
                 count += 1
+        for i in [self.B, self.I, self.P]:
+            i.change_x = -i.change_x
+            i.change_y = -i.change_y
         self.score += (count ** 2) * 100
+        self.score_live += (count ** 2) * 100
+        answer.stop()
         self.eat_ghost = False
         self.red_scare = False
         self.pink_scare = False
+        self.orange_scare = False
         self.blue_scare = False
 
     def display_frame(self, screen):
         screen.fill(BLACK)
         # рисование
         if self.round_win:
+            con = sqlite3.connect('data/records.db')
+            con.cursor().execute(f'''INSERT INTO record(score, level)
+                            VALUES ('{self.score}', '{self.level}')''')
+            con.commit()
+            con.close()
             self.display_message(screen, ["You won the level!",
                                           "Press Enter to continue."])
+            if self.not_was_win:
+                self.win_sound.stop()
+                answer = Thread(target=self.win)
+                answer.start()
         elif self.round_over:
             self.lives -= 1
+
             for i in self.enemies:
                 i.kill()
             self.player.explosion = False
@@ -252,7 +306,6 @@ class Game(object):
             self.player.rect.topleft = (9 * 25, 18 * 25)
             screen.blit(self.player.image, self.player.rect)
             self.player.round_over = False
-
             if self.lives == 0:
                 self.game_over = True
             else:
@@ -260,7 +313,8 @@ class Game(object):
                 self.B = Blinky(9 * 25, 10 * 25, -4.75, 0)
                 self.P = Pinky(9 * 25, 12 * 25, 0, 0)
                 self.I = Inky(10 * 25, 12 * 25, -1, 0)
-                self.enemies.add(self.B, self.P, self.I)
+                self.C = Clyde(8 * 25, 12 * 25, 1, 0)
+                self.enemies.add(self.B, self.P, self.I, self.C)
 
 
         elif self.game_over:
@@ -311,12 +365,12 @@ class Game(object):
 class Menu(object):
     state = 0
 
-    def __init__(self, items, font_color=(0, 0, 0), select_color=(255, 0, 0), ttf_font=None, font_size=25):
+    def __init__(self, items, font_color=(0, 0, 0), select_color=(255, 0, 0), ttf_font='data/fgr.ttf', font_size=25):
         self.font_color = font_color
         self.select_color = select_color
         self.items = items
         self.font = pygame.font.Font(ttf_font, font_size)
-        self.font2 = pygame.font.Font(None, 40)
+        self.font2 = pygame.font.Font('data/fgr.ttf', 20)
 
     def display_frame(self, screen):
         for index, item in enumerate(self.items):

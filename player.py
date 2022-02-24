@@ -1,7 +1,7 @@
 import pygame
-from enemies import enviroment
 from characteristic import *
 from math import fabs
+from enemies import enviroment
 
 
 class Player(pygame.sprite.Sprite):
