@@ -34,4 +34,5 @@ pip install moviepy <br>
 ### Скриншоты игры <br>
 ![alt tag](https://github.com/byoverr/PacMan/blob/main/img_for_readme/start.png "Начало игры")
 ![alt tag](https://github.com/byoverr/PacMan/blob/main/img_for_readme/middle_game.png "Сама игра")
+![alt tag](https://github.com/byoverr/PacMan/blob/main/img_for_readme/middle_game_scared.png "Привидения испуганы")
 ![alt tag](https://github.com/byoverr/PacMan/blob/main/img_for_readme/end.png "Конец игры")
